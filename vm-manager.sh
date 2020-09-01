@@ -6,13 +6,13 @@
 # all configuration takes place inside vm specific functions inside this file
 
 #comment out to run commands for real
-E=echo
+E='echo'
 
 # if number of command line arguements is less than 2
 if test $# -lt 2
 then
 	  cmds='[start|consolestart|stop|shutdown|restart|kill|console|monitor|status]'
-	    echo 'Usage: '$0' '$cmds' vm-name,...'
+	    echo "Usage: $0 $cmds vm-name"
 	      exit 1
 fi
 
@@ -33,6 +33,8 @@ machine='pc,accel=kvm'
 # define CPU
 
 # where to put kvm=off from https://bbs.archlinux.org/viewtopic.php?id=224021
+# we want quotes to be literals
+# shellcheck disable=SC2089
 cpu_args='-cpu host,kvm=off,vendor_id="testing234" -smp sockets=2,cores=2,threads=1'
 
 # define memory
@@ -111,6 +113,8 @@ case $2 in
 			start)
 				# build and then run commandline
 				win10_cfg
+				# we want quotes to be literals
+				# shellcheck disable=SC2090
 				$CMDLINE
 				;;
 			stop)
@@ -124,12 +128,12 @@ case $2 in
 			status)
 				;;
 			*)
-				echo "Unknown command: "$1 $2 >&2
+				echo "Unknown command: $1 $2" >&2
 				;;
 		esac
 		;;
 	*)
-		echo "Unknown command: "$1 $2 >&2
+		echo "Unknown command: $1 $2" >&2
 		;;
 esac
 
