@@ -9,7 +9,7 @@
 E=echo
 
 # if number of command line arguements is less than 2
-if [ "$#" < 2 ]; then
+if test $# -lt 2 then
 	  cmds='[start|consolestart|stop|shutdown|restart|kill|console|monitor|status]'
 	    echo 'Usage: '$0' '$cmds' vm-name,...'
 	      exit 1
