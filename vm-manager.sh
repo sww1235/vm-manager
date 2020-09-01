@@ -108,6 +108,7 @@ case $2 in
 	win10)
 		case $1 in
 			start)
+				win10_cfg
 				;;
 			stop)
 				;;
