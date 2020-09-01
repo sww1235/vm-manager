@@ -1,7 +1,8 @@
 #!/bin/sh
 
+# DEPENDANCIES: socat, qemu/kvm, bridge
 
-# Inspired by and heavily borred from https://github.com/mzch/vmmaestro.
+# Inspired by and heavily borrowed from https://github.com/mzch/vmmaestro.
 # This was designed to be very simple to manage, and not need libvirt
 # all configuration takes place inside vm specific functions inside this file
 
@@ -15,6 +16,8 @@ then
 	    echo "Usage: $0 $cmds vm-name"
 	      exit 1
 fi
+
+#TODO: check for dependancies
 
 
 win10_cfg() {
@@ -87,6 +90,11 @@ pid='-pidfile /tmp/win10vm.pid'
 iommu_args='-device intel-iommu'
 #iommu_vendor='Intel'
 
+# define monitor
+
+win10socket='/tmp/win10vm.sock'
+monitor='-monitor unix:'$win10socket',server,nowait'
+
 # misc options
 
 name='-name win10'
@@ -99,7 +107,7 @@ uuid='-uuid b2bbf4eb-4359-47cf-8477-05c481ee92fc'
 CMDLINE=$E' sudo '$qemu_cmd
 CMDLINE=$CMDLINE' -daemonize -runas kvm -nodefaults '$name
 CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args' '$machine
-CMDLINE=$CMDLINE' '$memory' '$bios' '$drive
+CMDLINE=$CMDLINE' '$memory' '$bios' '$drive' '$monitor
 CMDLINE=$CMDLINE' '$nic' '$graphics' '$usb
 CMDLINE=$CMDLINE' '$clock' '$pid' '$uuid
 }
