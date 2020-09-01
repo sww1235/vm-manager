@@ -54,46 +54,51 @@ bios=$bios' -drive if=pflash,format=raw,file='$bios_nvram
 disk_file='/var/lib/libvirt/images/win10.qcow2'
 drive='-drive if=virtio,format=qcow2,file='$disk_file
 
-# define floppy
-
-# define cdrom
-
-# define bootorder
-
 # define networking
+
+nic='-nic bridge,model=e1000,mac=52:54:00:e8:59:0f'
 
 # define display
 
-# define keyboard
+# PCIe passthrough
+#NVIDIA 1060 GPU and audio card
+graphics='-vga none'
+graphics=$graphics' -device vfio-pci,host=01:00.0,x-vga=on,multifunction=on'
+graphics=$graphics' -device vfio-pci,host=01:00.1'
 
-# define console
+# USB card
+
+usb='-device vfio-pci,host=07:00.0'
 
 # define clock
 
 # localtime because windows
-clock='-localtime'
-
-# define virtfs
+clock='-rtc base=localtime'
 
 # pid
 
 pid='-pidfile /tmp/win10vm.pid'
 
-# pcie/IOMMU
+#IOMMU
 
 iommu_args='-device intel-iommu'
-iommu_vendor='Intel'
+#iommu_vendor='Intel'
 
 # misc options
 
 name='-name win10'
-uuid='b2bbf4eb-4359-47cf-8477-05c481ee92fc'
+uuid='-uuid b2bbf4eb-4359-47cf-8477-05c481ee92fc'
 
 
 # final commandline
 
 #E adds echo in front of command
 CMDLINE=$E' sudo '$qemu_cmd
+CMDLINE=$CMDLINE' -daemonize -runas kvm -nodefaults '$name
+CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args
+CMDLINE=$CMDLINE' '$memory' '$bios' '$drive
+CMDLINE=$CMDLINE' '$nic' '$graphics' '$usb
+CMDLINE=$CMDLINE' '$clock' '$pid' '$uuid
 }
 
 
