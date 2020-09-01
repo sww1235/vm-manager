@@ -9,7 +9,7 @@
 E=echo
 
 # if number of command line arguements is less than 2
-if [[ $# < 2 ]]; then
+if [ "$#" < 2 ]; then
 	  cmds='[start|consolestart|stop|shutdown|restart|kill|console|monitor|status]'
 	    echo 'Usage: '$0' '$cmds' vm-name,...'
 	      exit 1
@@ -95,7 +95,7 @@ uuid='-uuid b2bbf4eb-4359-47cf-8477-05c481ee92fc'
 #E adds echo in front of command
 CMDLINE=$E' sudo '$qemu_cmd
 CMDLINE=$CMDLINE' -daemonize -runas kvm -nodefaults '$name
-CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args
+CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args' '$machine
 CMDLINE=$CMDLINE' '$memory' '$bios' '$drive
 CMDLINE=$CMDLINE' '$nic' '$graphics' '$usb
 CMDLINE=$CMDLINE' '$clock' '$pid' '$uuid
@@ -108,7 +108,9 @@ case $2 in
 	win10)
 		case $1 in
 			start)
+				# build and then run commandline
 				win10_cfg
+				$CMDLINE
 				;;
 			stop)
 				;;
