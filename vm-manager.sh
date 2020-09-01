@@ -101,6 +101,32 @@ CMDLINE=$CMDLINE' '$nic' '$graphics' '$usb
 CMDLINE=$CMDLINE' '$clock' '$pid' '$uuid
 }
 
+# $0 command vm_name
 
+# check vm first
+case $2 in 
+	win10)
+		case $1 in
+			start)
+				;;
+			stop)
+				;;
+			restart)
+				;;
+			shutdown)
+				;;
+			kill)
+				;;
+			status)
+				;;
+			*)
+				echo "Unknown command: "$1 $2 >&2
+				;;
+		esac
+		;;
+	*)
+		echo "Unknown command: "$1 $2 >&2
+		;;
+esac
 
 
