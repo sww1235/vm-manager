@@ -188,12 +188,18 @@ case $2 in
 				$CMDLINE
 				;;
 			stop)
+				stopVM
 				;;
 			restart)
+				stopVM
+				win10_cfg
+				$CMDLINE
 				;;
 			shutdown)
+				stopVM
 				;;
 			kill)
+				haltVM
 				;;
 			status)
 				;;
