@@ -10,108 +10,170 @@
 E='echo'
 
 # if number of command line arguements is less than 2
-if test $# -lt 2
+if [ $# -lt 2 ]
 then
-	  cmds='[start|consolestart|stop|shutdown|restart|kill|console|monitor|status]'
-	    echo "Usage: $0 $cmds vm-name"
-	      exit 1
+	cmds='[start|consolestart|stop|shutdown|restart|kill|console|monitor|status]'
+	echo "Usage: $0 $cmds vm-name"
+	exit 1
 fi
 
 #TODO: check for dependancies
 
+boot_qemu_delay=10
 
 win10_cfg() {
 
-# define vm architecture and qemu command
+	# define vm architecture and qemu command
 
-# use x86_64 as that is the target arch of the VM
+	# use x86_64 as that is the target arch of the VM
 
-qemu_cmd='qemu-system-x86_64 -enable-kvm -accel kvm'
+	qemu_cmd='qemu-system-x86_64 -enable-kvm -accel kvm'
 
-# define machine architecture
+	# define machine architecture
 
-# alias of pc-1440fx-5.1
-machine='pc,accel=kvm'
+	#TODO: switch to q35 once this is working
 
-# define CPU
+	# alias of pc-1440fx-5.1
+	machine='pc,accel=kvm'
 
-# where to put kvm=off from https://bbs.archlinux.org/viewtopic.php?id=224021
-# we want quotes to be literals
-# shellcheck disable=SC2089
-cpu_args='-cpu host,kvm=off,vendor_id="testing234" -smp sockets=2,cores=2,threads=1'
+	# define CPU
 
-# define memory
+	# where to put kvm=off from https://bbs.archlinux.org/viewtopic.php?id=224021
+	# we want quotes to be literals
+	# shellcheck disable=SC2089
+	cpu_args='-cpu host,kvm=off,vendor_id="testing234" -smp sockets=2,cores=2,threads=1'
 
-# 8GB of ram
-memory='-m 8G'
+	# define memory
 
-# define bios
+	# 8GB of ram
+	memory='-m 8G'
 
-# https://unix.stackexchange.com/questions/530674/qemu-doesnt-respect-the-boot-order-when-booting-with-uefi-ovmf
+	# define bios
 
-# Don't actually have to use the -bios flag
-bios_file='/usr/share/ovmf/OVMF_CODE-pure-efi.fd'
-bios_nvram='/var/lib/libvirt/qemu/nvram/win10_VARS.fd'
-bios='-drive if=pflash,format=raw,readonly=on,file='$bios_file
-bios=$bios' -drive if=pflash,format=raw,file='$bios_nvram
+	# https://unix.stackexchange.com/questions/530674/qemu-doesnt-respect-the-boot-order-when-booting-with-uefi-ovmf
 
-# define disk drives
+	# Don't actually have to use the -bios flag
+	bios_file='/usr/share/ovmf/OVMF_CODE-pure-efi.fd'
+	bios_nvram='/var/lib/libvirt/qemu/nvram/win10_VARS.fd'
+	bios='-drive if=pflash,format=raw,readonly=on,file='$bios_file
+	bios=$bios' -drive if=pflash,format=raw,file='$bios_nvram
 
-disk_file='/var/lib/libvirt/images/win10.qcow2'
-drive='-drive if=virtio,format=qcow2,file='$disk_file
+	# define disk drives
 
-# define networking
+	disk_file='/var/lib/libvirt/images/win10.qcow2'
+	drive='-drive if=virtio,format=qcow2,file='$disk_file
 
-nic='-nic bridge,model=e1000,mac=52:54:00:e8:59:0f'
+	# define networking
 
-# define display
+	nic='-nic bridge,model=e1000,mac=52:54:00:e8:59:0f'
 
-# PCIe passthrough
-#NVIDIA 1060 GPU and audio card
-graphics='-vga none'
-graphics=$graphics' -device vfio-pci,host=01:00.0,x-vga=on,multifunction=on'
-graphics=$graphics' -device vfio-pci,host=01:00.1'
+	# define display
 
-# USB card
+	# PCIe passthrough
+	#NVIDIA 1060 GPU and audio card
+	graphics='-vga none'
+	graphics=$graphics' -device vfio-pci,host=01:00.0,x-vga=on,multifunction=on'
+	graphics=$graphics' -device vfio-pci,host=01:00.1'
 
-usb='-device vfio-pci,host=07:00.0'
+	# USB card
 
-# define clock
+	usb='-device vfio-pci,host=07:00.0'
 
-# localtime because windows
-clock='-rtc base=localtime'
+	# define clock
 
-# pid
+	# localtime because windows
+	clock='-rtc base=localtime'
 
-pid='-pidfile /tmp/win10vm.pid'
+	# pid
 
-#IOMMU
+	pidFile='/tmp/win10.pid'
+	pid='-pidfile '$pidFile
 
-iommu_args='-device intel-iommu'
-#iommu_vendor='Intel'
+	#IOMMU
 
-# define monitor
+	iommu_args='-device intel-iommu'
+	#iommu_vendor='Intel'
 
-win10socket='/tmp/win10vm.sock'
-monitor='-monitor unix:'$win10socket',server,nowait'
+	# define monitor
 
-# misc options
+	socketFile='/tmp/win10.sock'
+	monitor='-monitor unix:'$socketFile',server,nowait'
 
-name='-name win10'
-uuid='-uuid b2bbf4eb-4359-47cf-8477-05c481ee92fc'
+	# misc options
+
+	name='-name win10'
+	uuid='-uuid b2bbf4eb-4359-47cf-8477-05c481ee92fc'
 
 
-# final commandline
+	# final commandline
 
-#E adds echo in front of command
-CMDLINE=$E' sudo '$qemu_cmd
-CMDLINE=$CMDLINE' -daemonize -runas kvm -nodefaults '$name
-CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args' '$machine
-CMDLINE=$CMDLINE' '$memory' '$bios' '$drive' '$monitor
-CMDLINE=$CMDLINE' '$nic' '$graphics' '$usb
-CMDLINE=$CMDLINE' '$clock' '$pid' '$uuid
+	#E adds echo in front of command
+	CMDLINE=$E' sudo '$qemu_cmd
+	CMDLINE=$CMDLINE' -daemonize -runas kvm -nodefaults '$name
+	CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args' '$machine
+	CMDLINE=$CMDLINE' '$memory' '$bios' '$drive' '$monitor
+	CMDLINE=$CMDLINE' '$nic' '$graphics' '$usb
+	CMDLINE=$CMDLINE' '$clock' '$pid' '$uuid
 }
 
+proc_check(){
+
+	if [ ! -f $pidFile ]
+	then
+		return 1
+	fi
+	# from man kill: if signal is 0, then no actual signal is sent,
+	# but error checking is still performed
+	sudo kill -0 "$(sudo cat $pidFile)" > /dev/null 2>&1
+	# $? = return value of last command
+	return $?
+}
+
+# Generic stop function. Relies on VM name being in $2
+# this attempts to shutdown VM gracefully
+stopVM(){
+
+	echo "Shutting down $2"
+	echo system_powerdown | sudo socat - unix-connect:/tmp/"$2".sock
+	delay=0
+	proc_check
+	while [ ! $? ] && [ $delay -lt $boot_qemu_delay ];
+	do
+		# discard output of arith expression with `:` command
+		: $((delay=delay+1))
+		sleep 1
+		proc_check
+	done
+
+	if [ $boot_qemu_delay = "$delay" ]
+	then
+		echo "Failed to shutdown $2"
+		exit 1
+	fi
+}
+
+# Generic halt function. Relies on VM name being in $2
+# this this kils vm
+haltVM(){
+
+	echo "Halting $2"
+	echo stop | sudo socat - unix-connect:/tmp/"$2".sock
+	delay=0
+	proc_check
+	while [ ! $? ] && [ $delay -lt $boot_qemu_delay ];
+	do
+		# discard output of arith expression with `:` command
+		: $((delay=delay+1))
+		sleep 1
+		proc_check
+	done
+
+	if [ $boot_qemu_delay = "$delay" ]
+	then
+		echo "Failed to stop $2"
+		exit 1
+	fi
+}
 # $0 command vm_name
 
 # check vm first
