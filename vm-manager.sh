@@ -1,6 +1,10 @@
 #!/bin/sh
 
-# DEPENDANCIES: socat, qemu/kvm, bridge
+# DEPENDANCIES: socat, qemu/kvm, bridge-utils
+
+# need to create kvm user
+# add KVM kernal module
+# create bridge interface for NIC
 
 # Inspired by and heavily borrowed from https://github.com/mzch/vmmaestro.
 # This was designed to be very simple to manage, and not need libvirt
@@ -17,7 +21,26 @@ then
 	exit 1
 fi
 
-#TODO: check for dependancies
+# check for dependancies
+
+depMissing=0
+deps="socat qemu-system-x86_64"
+for cmd in $deps
+do
+	printf '%-10s' "$cmd"
+	if command -v "$cmd" 2>&1 /dev/null
+	then
+		echo present
+	else
+		echo missing
+		: $((depMissing=depMissing+1))
+	fi
+done
+
+if depMissing -gt 0
+then
+	exit 1
+fi
 
 boot_qemu_delay=10
 
