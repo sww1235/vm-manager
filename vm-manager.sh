@@ -188,18 +188,21 @@ case $2 in
 				$CMDLINE
 				;;
 			stop)
-				stopVM
+				# need to pass $@ to function in order to use script positional arguments inside function
+				stopVM "$@" 
 				;;
 			restart)
-				stopVM
+				stopVM "$@"
 				win10_cfg
+				# we want quotes to be literals
+				# shellcheck disable=SC2090
 				$CMDLINE
 				;;
 			shutdown)
-				stopVM
+				stopVM "$@"
 				;;
 			kill)
-				haltVM
+				haltVM "$@"
 				;;
 			status)
 				;;
