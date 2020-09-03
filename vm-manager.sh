@@ -16,7 +16,7 @@ E='echo'
 # if number of command line arguements is less than 2
 if [ $# -lt 2 ]
 then
-	cmds='[start|consolestart|stop|shutdown|restart|kill|console|monitor|status]'
+	cmds='[start|stop|shutdown|restart|kill|monitor|status]'
 	echo "Usage: $0 $cmds vm-name"
 	exit 1
 fi
@@ -197,6 +197,28 @@ haltVM(){
 		exit 1
 	fi
 }
+
+# connect to monitor socket of kvm VM
+connectMonitor(){
+
+	clear
+	echo "For reasons unknown, ^O is the panic button."
+	sudo socat -,raw,echo=0,escape=0x0f unix-connect:/tmp/"$2".sock
+
+}
+# show vm status
+statusVM(){
+
+	if proc_check 
+	then
+		printf "%s is stopped" "$2"
+		return 1
+	else
+		printf "%s is running" "$2"
+		return 0
+	fi
+}
+
 # $0 command vm_name
 
 # check vm first
@@ -228,9 +250,14 @@ case $2 in
 				haltVM "$@"
 				;;
 			status)
+				statusVM "$@"
+				;;
+			monitor)
+				connectMonitor "$@"
 				;;
 			*)
 				echo "Unknown command: $1 $2" >&2
+				echo "$cmds"
 				;;
 		esac
 		;;
