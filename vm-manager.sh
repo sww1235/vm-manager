@@ -37,7 +37,7 @@ do
 	fi
 done
 
-if depMissing -gt 0
+if $depMissing -gt 0
 then
 	exit 1
 fi
