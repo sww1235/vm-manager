@@ -88,7 +88,7 @@ win10_cfg() {
 
 	# define networking
 
-	nic='-nic bridge,model=e1000,mac=52:54:00:e8:59:0f'
+	nic='-nic bridge,br=vmbridge,model=e1000,mac=52:54:00:e8:59:0f'
 
 	# define display
 
