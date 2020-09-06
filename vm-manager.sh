@@ -11,7 +11,7 @@
 # all configuration takes place inside vm specific functions inside this file
 
 #comment out to run commands for real
-E='echo'
+#E='echo'
 
 # if number of command line arguements is less than 2
 if [ $# -lt 2 ]
