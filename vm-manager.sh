@@ -50,14 +50,14 @@ win10_cfg() {
 
 	# use x86_64 as that is the target arch of the VM
 
-	qemu_cmd='qemu-system-x86_64 -enable-kvm -accel kvm'
+	qemu_cmd='qemu-system-x86_64 -enable-kvm'
 
 	# define machine architecture
 
 	#TODO: switch to q35 once this is working
 
-	# alias of pc-1440fx-5.1
-	machine='pc,accel=kvm'
+	# alias of pc-i440fx-5.1
+	machine='-machine pc,accel=kvm'
 
 	# define CPU
 
@@ -77,13 +77,13 @@ win10_cfg() {
 
 	# Don't actually have to use the -bios flag
 	bios_file='/usr/share/ovmf/OVMF_CODE-pure-efi.fd'
-	bios_nvram='/var/lib/libvirt/qemu/nvram/win10_VARS.fd'
+	bios_nvram='/var/lib/qemu/nvram/win10_VARS.fd'
 	bios='-drive if=pflash,format=raw,readonly=on,file='$bios_file
 	bios=$bios' -drive if=pflash,format=raw,file='$bios_nvram
 
 	# define disk drives
 
-	disk_file='/var/lib/libvirt/images/win10.qcow2'
+	disk_file='/var/lib/qemu/images/win10.qcow2'
 	drive='-drive if=virtio,format=qcow2,file='$disk_file
 
 	# define networking
