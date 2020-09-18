@@ -13,6 +13,8 @@
 #comment out to run commands for real
 #E='echo'
 
+sudo='sudo'
+
 # if number of command line arguements is less than 2
 if [ $# -lt 2 ]
 then
@@ -57,14 +59,14 @@ win10_cfg() {
 	#TODO: switch to q35 once this is working
 
 	# alias of pc-i440fx-5.1
-	machine='-machine pc,accel=kvm'
+	machine='-machine q35,accel=kvm,kernel-irqchip=split'
 
 	# define CPU
 
 	# where to put kvm=off from https://bbs.archlinux.org/viewtopic.php?id=224021
 	# we want quotes to be literals
 	# shellcheck disable=SC2089
-	cpu_args='-cpu host,kvm=off,vendor_id="testing234" -smp sockets=2,cores=2,threads=1'
+	cpu_args='-cpu host,kvm=off,hv-vendor-id="testing234" -smp sockets=2,cores=2,threads=1'
 
 	# define memory
 
@@ -114,7 +116,7 @@ win10_cfg() {
 
 	#IOMMU
 
-	iommu_args='-device intel-iommu'
+	iommu_args='-device intel-iommu,intremap=on,caching-mode=on'
 	#iommu_vendor='Intel'
 
 	# define monitor
@@ -147,7 +149,7 @@ proc_check(){
 	fi
 	# from man kill: if signal is 0, then no actual signal is sent,
 	# but error checking is still performed
-	sudo kill -0 "$(sudo cat $pidFile)" > /dev/null 2>&1
+	$sudo kill -0 "$(sudo cat $pidFile)" > /dev/null 2>&1
 	# $? = return value of last command
 	return $?
 }
@@ -157,7 +159,7 @@ proc_check(){
 stopVM(){
 
 	echo "Shutting down $2"
-	echo system_powerdown | sudo socat - unix-connect:/tmp/"$2".sock
+	echo system_powerdown | $sudo socat - unix-connect:/tmp/"$2".sock
 	delay=0
 	proc_check
 	while [ ! $? ] && [ $delay -lt $boot_qemu_delay ];
@@ -180,7 +182,7 @@ stopVM(){
 haltVM(){
 
 	echo "Halting $2"
-	echo stop | sudo socat - unix-connect:/tmp/"$2".sock
+	echo stop | $sudo socat - unix-connect:/tmp/"$2".sock
 	delay=0
 	proc_check
 	while [ ! $? ] && [ $delay -lt $boot_qemu_delay ];
@@ -203,7 +205,7 @@ connectMonitor(){
 
 	clear
 	echo "For reasons unknown, ^O is the panic button."
-	sudo socat -,raw,echo=0,escape=0x0f unix-connect:/tmp/"$2".sock
+	$sudo socat -,raw,echo=0,escape=0x0f unix-connect:/tmp/"$2".sock
 
 }
 # show vm status
