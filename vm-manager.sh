@@ -111,10 +111,20 @@ win10_cfg() {
 	# define display
 
 	# PCIe passthrough
+
+	# set up pcie root heirarchy - Q35 only
+
+	# slot/chassis pair is mandatory for each PCIe root port
+	# https://github.com/qemu/qemu/blob/053a4177817db307ec854356e95b5b350800a216/docs/pcie.txt#L114
+	# addr=0 is mch
+	# addr=1 is e1000
+	# addr=2 is achi root complex
+	pcie='-device ioh3420,id=root.1,chassis=1,slot=1,bus=pcie.0,addr=3'
 	#NVIDIA 1060 GPU and audio card
-	graphics='-vga none'
-	graphics=$graphics' -device vfio-pci,host=01:00.0,x-vga=on,multifunction=on'
-	graphics=$graphics' -device vfio-pci,host=01:00.1'
+	graphics='-vga none -display none -nographic'
+	#graphics=$graphics' -device pcie-pci-bridge,addr=1e.0,id=pci.1,'
+	graphics=$graphics' -device vfio-pci,host=01:00.0,addr=0,bus=root.1,x-vga=on,multifunction=on'
+	graphics=$graphics' -device vfio-pci,host=01:00.1,addr=1,bus=root.1'
 
 	# USB card
 
@@ -152,11 +162,11 @@ win10_cfg() {
 	# final commandline
 
 	#E adds echo in front of command
-	CMDLINE=$E' sudo '$qemu_cmd
+	CMDLINE=$E' '$sudo' '$qemu_cmd
 	CMDLINE=$CMDLINE' -daemonize -runas kvm -nodefaults '$name
-	CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args' '$machine
+	CMDLINE=$CMDLINE' '$iommu_args' '$cpu_args' '$machine' '$ahci
 	CMDLINE=$CMDLINE' '$memory' '$bios' '$drive' '$monitor
-	CMDLINE=$CMDLINE' '$nic' '$graphics' '$usb
+	CMDLINE=$CMDLINE' '$nic' '$pcie' '$graphics' '$usb' '$cdrom
 	CMDLINE=$CMDLINE' '$clock' '$pid' '$uuid
 }
 
