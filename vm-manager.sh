@@ -83,11 +83,27 @@ win10_cfg() {
 	bios='-drive if=pflash,format=raw,readonly=on,file='$bios_file
 	bios=$bios' -drive if=pflash,format=raw,file='$bios_nvram
 
-	# define disk drives
+
+	# define ahci bus
+
+	ahci='-device ahci,id=achi0'
+	
+	# define CD ROM for booting ISOs (temporary)
+
+	# https://unix.stackexchange.com/a/603352/81810 
+
+	iso_file='/home/toxicsauce/Downloads/Win10_2004_English_x64.iso'
+	#cdrom='-drive format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on,file='$iso_file
+	#cdrom=$cdrom' -device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=0'
+
+	#define disk drives
 
 	disk_file='/var/lib/qemu/images/win10.qcow2'
-	drive='-drive if=virtio,format=qcow2,file='$disk_file
 
+	#disk_file='/mnt/pool0/tmp/win10.qcow2'
+	drive='-drive if=none,id=drive-hd1,format=qcow2,file='$disk_file
+	drive=$drive' -device ide-hd,bus=achi0.1,drive=drive-hd1,id=hd1,bootindex=1'
+	
 	# define networking
 
 	nic='-nic bridge,br=vmbridge,model=e1000,mac=52:54:00:e8:59:0f'
@@ -102,7 +118,10 @@ win10_cfg() {
 
 	# USB card
 
-	usb='-device vfio-pci,host=07:00.0'
+	#usb='-device vfio-pci,host=07:00.0,bus=pci.1,addr=7.0'
+	usb='-device qemu-xhci'
+	usb=$usb' -device usb-host,vendorid=0x413c,productid=0x2003'
+	usb=$usb' -device usb-host,vendorid=0x1b1c,productid=0x1b35'
 
 	# define clock
 
