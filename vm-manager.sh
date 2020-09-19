@@ -116,15 +116,12 @@ win10_cfg() {
 
 	# slot/chassis pair is mandatory for each PCIe root port
 	# https://github.com/qemu/qemu/blob/053a4177817db307ec854356e95b5b350800a216/docs/pcie.txt#L114
-	# addr=0 is mch
-	# addr=1 is e1000
-	# addr=2 is achi root complex
-	pcie='-device ioh3420,id=root.1,chassis=1,slot=1,bus=pcie.0,addr=3'
+	pcie='-device pcie-root-port,id=root.1,chassis=0,slot=0,bus=pcie.0'
 	#NVIDIA 1060 GPU and audio card
 	graphics='-vga none -display none -nographic'
 	#graphics=$graphics' -device pcie-pci-bridge,addr=1e.0,id=pci.1,'
-	graphics=$graphics' -device vfio-pci,host=01:00.0,addr=0,bus=root.1,x-vga=on,multifunction=on'
-	graphics=$graphics' -device vfio-pci,host=01:00.1,addr=1,bus=root.1'
+	graphics=$graphics' -device vfio-pci,host=01:00.0,bus=root.1,x-vga=on,multifunction=on'
+	graphics=$graphics' -device vfio-pci,host=01:00.1,bus=pcie.0'
 
 	# USB card
 
