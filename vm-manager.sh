@@ -116,12 +116,18 @@ win10_cfg() {
 
 	# slot/chassis pair is mandatory for each PCIe root port
 	# https://github.com/qemu/qemu/blob/053a4177817db307ec854356e95b5b350800a216/docs/pcie.txt#L114
-	pcie='-device pcie-root-port,id=root.1,chassis=0,slot=0,bus=pcie.0'
+	#pcie='-device pcie-root-port,id=root.1,chassis=0,slot=0,bus=pcie.0'
 	#NVIDIA 1060 GPU and audio card
 	graphics='-vga none -display none -nographic'
-	#graphics=$graphics' -device pcie-pci-bridge,addr=1e.0,id=pci.1,'
-	graphics=$graphics' -device vfio-pci,host=01:00.0,bus=root.1,x-vga=on,multifunction=on'
-	graphics=$graphics' -device vfio-pci,host=01:00.1,bus=pcie.0'
+	# bug with IOMMU groups and multifunction devices. Need to use PCIe-PCI bridge to
+	# mask requester ID
+	#https://www.mail-archive.com/qemu-devel@nongnu.org/msg607680.html
+	graphics=$graphics' -device pcie-pci-bridge,addr=1e.0,id=pci.1,'
+	graphics=$graphics' -device vfio-pci,host=01:00.0,bus=pci.1,addr=1.0,x-vga=on,multifunction=on'
+	graphics=$graphics' -device vfio-pci,host=01:00.1,bus=pci.1,addr=1.1'
+	#graphics=$graphics' -device vfio-pci,host=01:00.0,bus=pcie.0,x-vga=on,multifunction=on'
+	#graphics=$graphics' -device vfio-pci,host=01:00.1,bus=pcie.0'
+
 
 	# USB card
 
