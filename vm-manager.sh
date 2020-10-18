@@ -59,7 +59,7 @@ win10_cfg() {
 	#TODO: switch to q35 once this is working
 
 	# alias of pc-i440fx-5.1
-	machine='-machine q35,accel=kvm,kernel-irqchip=split'
+	machine='-machine q35,accel=kvm'
 
 	# define CPU
 
@@ -148,7 +148,7 @@ win10_cfg() {
 
 	#IOMMU
 
-	iommu_args='-device intel-iommu,intremap=on,caching-mode=on'
+	iommu_args='-device intel-iommu,caching-mode=on'
 	#iommu_vendor='Intel'
 
 	# define monitor
