@@ -131,11 +131,12 @@ win10_cfg() {
 
 
 	# USB card
-
-	#usb='-device vfio-pci,host=07:00.0,bus=pci.1,addr=7.0'
-	usb='-device qemu-xhci'
-	usb=$usb' -device usb-host,vendorid=0x413c,productid=0x2003'
-	usb=$usb' -device usb-host,vendorid=0x1b1c,productid=0x1b35'
+	# need softdep xhci_hcd pre: vfio_pci in modprobe.d config + make sure to regenerate initramfs.
+	# this prevents xhci_hcd binding to the pcie card before vfio_pci
+	usb='-device vfio-pci,host=07:00.0,bus=pcie.0'
+	#usb='-device qemu-xhci'
+	#usb=$usb' -device usb-host,vendorid=0x413c,productid=0x2003'
+	#usb=$usb' -device usb-host,vendorid=0x1b1c,productid=0x1b35'
 
 	# define clock
 
