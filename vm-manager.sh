@@ -5,6 +5,7 @@
 # need to create kvm user
 # add KVM kernal module
 # create bridge interface for NIC
+# setup vfio-pci
 
 # Inspired by and heavily borrowed from https://github.com/mzch/vmmaestro.
 # This was designed to be very simple to manage, and not need libvirt
@@ -56,9 +57,6 @@ win10_cfg() {
 
 	# define machine architecture
 
-	#TODO: switch to q35 once this is working
-
-	# alias of pc-i440fx-5.1
 	machine='-machine q35,accel=kvm'
 
 	# define CPU
@@ -122,21 +120,13 @@ win10_cfg() {
 	# bug with IOMMU groups and multifunction devices. Need to use PCIe-PCI bridge to
 	# mask requester ID
 	#https://www.mail-archive.com/qemu-devel@nongnu.org/msg607680.html
-	#graphics=$graphics' -device pcie-pci-bridge,addr=1e.0,id=pci.1,'
-	#graphics=$graphics' -device vfio-pci,host=01:00.0,bus=pci.1,addr=1.0,x-vga=on,multifunction=on'
-	#graphics=$graphics' -device vfio-pci,host=01:00.1,bus=pci.1,addr=1.1'
-	#graphics=$graphics' -device vfio-pci,host=01:00.0,bus=pcie.0,x-vga=on,multifunction=on'
 	graphics=$graphics' -device vfio-pci,host=01:00.0,bus=pcie.0,x-vga=on'
-	#graphics=$graphics' -device vfio-pci,host=01:00.1,bus=pcie.0'
 
 
 	# USB card
 	# need softdep xhci_hcd pre: vfio_pci in modprobe.d config + make sure to regenerate initramfs.
 	# this prevents xhci_hcd binding to the pcie card before vfio_pci
 	usb='-device vfio-pci,host=07:00.0,bus=pcie.0'
-	#usb='-device qemu-xhci'
-	#usb=$usb' -device usb-host,vendorid=0x413c,productid=0x2003'
-	#usb=$usb' -device usb-host,vendorid=0x1b1c,productid=0x1b35'
 
 	# define clock
 
@@ -188,7 +178,7 @@ void_cfg() {
 	#TODO: switch to q35 once this is working
 
 	# alias of pc-i440fx-5.1
-	machine='-machine q35,accel=kvm,kernel-irqchip=split'
+	machine='-machine q35,accel=kvm'
 
 	# define CPU
 
@@ -216,10 +206,10 @@ void_cfg() {
 	# define ahci bus
 
 	ahci='-device ahci,id=achi0'
-	
+
 	# define CD ROM for booting ISOs (temporary)
 
-	# https://unix.stackexchange.com/a/603352/81810 
+	# https://unix.stackexchange.com/a/603352/81810
 
 	iso_file='/home/toxicsauce/void-live-x86_64-20191109.iso'
 	#cdrom='-drive format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on,file='$iso_file
@@ -229,10 +219,9 @@ void_cfg() {
 
 	disk_file='/var/lib/qemu/images/void.qcow2'
 
-	#disk_file='/mnt/pool0/tmp/win10.qcow2'
 	drive='-drive if=none,id=drive-hd1,format=qcow2,file='$disk_file
 	drive=$drive' -device ide-hd,bus=achi0.1,drive=drive-hd1,id=hd1,bootindex=1'
-	
+
 	# define networking
 
 	nic='-nic bridge,br=vmbridge,model=e1000,mac=52:54:00:e8:59:0f'
@@ -248,16 +237,11 @@ void_cfg() {
 	pcie='-device pcie-root-port,id=root.1,chassis=0,slot=0,bus=pcie.0'
 	#NVIDIA 1060 GPU and audio card
 	graphics='-vga none -display none -nographic'
-	#graphics=$graphics' -device pcie-pci-bridge,addr=1e.0,id=pci.1,'
-	graphics=$graphics' -device vfio-pci,host=01:00.0,bus=root.1,x-vga=on,multifunction=on'
-	graphics=$graphics' -device vfio-pci,host=01:00.1,bus=pcie.0'
+	graphics=$graphics' -device vfio-pci,host=01:00.0,bus=root.1,x-vga=on'
 
 	# USB card
 
-	#usb='-device vfio-pci,host=07:00.0,bus=pci.1,addr=7.0'
-	usb='-device qemu-xhci'
-	usb=$usb' -device usb-host,vendorid=0x413c,productid=0x2003'
-	usb=$usb' -device usb-host,vendorid=0x1b1c,productid=0x1b35'
+	usb='-device vfio-pci,host=07:00.0,bus=pci.0'
 
 	# define clock
 
@@ -271,7 +255,7 @@ void_cfg() {
 
 	#IOMMU
 
-	iommu_args='-device intel-iommu,intremap=on,caching-mode=on'
+	iommu_args='-device intel-iommu,caching-mode=on'
 	#iommu_vendor='Intel'
 
 	# define monitor
