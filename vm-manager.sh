@@ -241,7 +241,7 @@ void_cfg() {
 
 	# USB card
 
-	usb='-device vfio-pci,host=07:00.0,bus=pci.0'
+	usb='-device vfio-pci,host=07:00.0,bus=pcie.0'
 
 	# define clock
 
