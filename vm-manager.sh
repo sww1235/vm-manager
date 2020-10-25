@@ -104,7 +104,8 @@ win10_cfg() {
 	
 	# define networking
 
-	nic='-nic bridge,br=vmbridge,model=e1000,mac=52:54:00:e8:59:0f'
+	#nic='-nic bridge,br=vmbridge,model=e1000,mac=52:54:00:e8:59:0f'
+	nic='-device vfio-pci,host=05:00.0,bus=pcie.0'
 
 	# define display
 
@@ -224,7 +225,8 @@ void_cfg() {
 
 	# define networking
 
-	nic='-nic bridge,br=vmbridge,model=e1000,mac=52:54:00:e8:59:0f'
+	#nic='-nic bridge,br=vmbridge,model=e1000,mac=52:54:00:e8:59:0f'
+	nic='-device vfio-pci,host=05:00.0,bus=pcie.0'
 
 	# define display
 
