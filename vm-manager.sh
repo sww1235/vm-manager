@@ -68,8 +68,9 @@ win10_cfg() {
 
 	# define memory
 
-	# 8GB of ram
-	memory='-m 8G'
+	# 24GB of ram
+	# leaving 8GB for host
+	memory='-m 24G'
 
 	# define bios
 
@@ -190,8 +191,9 @@ void_cfg() {
 
 	# define memory
 
-	# 8GB of ram
-	memory='-m 8G'
+	# 24GB of ram
+	# leaving 8GB for host
+	memory='-m 24G'
 
 	# define bios
 
